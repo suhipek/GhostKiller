@@ -125,6 +125,10 @@ def url_tracker(tracker_id):
         if db_session:
             db_session.close()
 
+@app.get('/login')
+def login_page():
+    return send_file("templates/login.html")
+
 @app.post('/login')
 def login():
     try:
@@ -176,6 +180,10 @@ def register():
         if db_session:
             db_session.close()
     
+@app.get('/list_trackers')
+def list_trackers_page():
+    return send_file("templates/list_trackers.html")
+    
 @app.post('/list_trackers')
 def list_trackers():
     try:
@@ -188,6 +196,8 @@ def list_trackers():
         
         trackers = list(map(lambda x: x.__dict__, trackers))
         list(map(lambda x: x.pop('_sa_instance_state'), trackers))
+        for t in trackers:
+            t['record_num'] = 0 
         return {'status': 'success', 'message': "获取成功", 'trackers': trackers}
     
     except Exception as e:
@@ -224,6 +234,11 @@ def add_tracker():
     finally:
         if db_session:
             db_session.close()
+
+@app.get('/tracker_info/<int:tracker_id>')
+def tracker_info_page(tracker_id):
+    return send_file("templates/tracker_info.html")
+
 
 @app.post('/tracker_info/<int:tracker_id>')
 def tracker_info(tracker_id):
@@ -272,6 +287,8 @@ def tracker_update(tracker_id):
         tracker.tracker_type = tracker_type if tracker_type else tracker.tracker_type
         tracker.timing_enabled = timing_enabled if request.form.get('timing_enabled') else tracker.timing_enabled
         tracker.status = status if status else tracker.status
+        print(status)
+        print(tracker.__dict__)
         db_session.add(tracker)
         db_session.commit()
         return success("更新成功")
@@ -281,6 +298,10 @@ def tracker_update(tracker_id):
     finally:
         if db_session:
             db_session.close()
+
+@app.get('/tracker_records/<int:tracker_id>')
+def tracker_records_page(tracker_id):
+    return send_file("templates/tracker_records.html")
 
 @app.post('/tracker_records/<int:tracker_id>')
 def tracker_records(tracker_id):
@@ -322,7 +343,7 @@ def tracker_records(tracker_id):
 # 启动应用程序
 if __name__ == '__main__':
     from sqlalchemy import create_engine
-    CONNSTR = f'postgresql://postgres:daimeng.233@127.0.0.1/GhostKiller'
+    CONNSTR = f'postgresql://postgres:password@127.0.0.1/GhostKiller'
     engine = create_engine(CONNSTR)
     session_factory = sessionmaker(bind=engine)
     app.run()

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录与注册</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="flex items-center justify-center h-screen bg-gray-200">
+    <div class="w-full max-w-xs">
+        <form id="userForm" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+                    用户名
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" placeholder="用户名">
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+                    密码
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" placeholder="******************">
+            </div>
+            <div class="flex items-center justify-between">
+                <button id="loginBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+                    登录
+                </button>
+                <button id="registerBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+                    注册
+                </button>
+            </div>
+        </form>
+        <p id="message" class="text-center text-gray-500 text-xs"></p>
+    </div>
+    <script>
+        const form = document.getElementById('userForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const message = document.getElementById('message');
+
+        function postData(url = '', data = {}) {
+            return fetch(url, {
+                method: 'POST',
+                mode: 'cors', // add this line
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(data),
+            })
+            .then(response => response.json());
+        }
+        
+        loginBtn.addEventListener('click', function() {
+            postData('http://127.0.0.1:5000/login', {
+                username: form.username.value,
+                password: form.password.value
+            })
+            .then(data => {
+                message.textContent = data.message;
+                if (data.status === 'success') {
+                    window.location.href = '/list_trackers';
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
+        
+        registerBtn.addEventListener('click', function() {
+            postData('http://127.0.0.1:5000/register', {
+                username: form.username.value,
+                password: form.password.value
+            })
+            .then(data => {
+                message.textContent = data.message;
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
+        
+    </script>
+</body>
+</html>

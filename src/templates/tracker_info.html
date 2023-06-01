@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>追踪器信息</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-200">
+    <div class="container mx-auto py-10">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-bold">编辑追踪器</h1>
+            <button id="backBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mb-4">
+                返回
+            </button>
+        </div>
+        <div id="message" class="mb-4"></div>
+        <form id="trackerForm" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="alias">
+                    别名
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="alias" type="text">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="description">
+                    描述
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="description" type="text">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="status">
+                    状态
+                </label>
+                <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="status">
+                    <option value="enabled">激活</option>
+                    <option value="disabled">不记录</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="timing_enabled">
+                    计时功能
+                </label>
+                <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="timing_enabled">
+                    <option value="true">激活</option>
+                    <option value="false">不记录</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="tracker_type">
+                    追踪器类型
+                </label>
+                <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="tracker_type">
+                    <option value="pixel">单像素追踪器</option                    <option value="url">短链接追踪器</option>
+                </select>
+            </div>
+            <div class="mb-4 hidden">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="redirect_url">
+                    重定向URL
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="redirect_url" type="text" readonly>
+                <button id="linkInfoBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-2">
+                    查看链接信息
+                </button>
+            </div>
+            <div class="mb-4 hidden">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="user_id">
+                    用户ID
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="user_id" type="text" readonly>
+            </div>
+            <div class="mb-4 hidden">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="tracker_id">
+                    追踪器ID
+                </label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="tracker_id" type="text" readonly>
+            </div>
+            <div class="flex items-center justify-between">
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+                    提交
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const trackerId = window.location.pathname.split('/').pop();
+        const message = document.getElementById('message');
+        const backBtn = document.getElementById('backBtn');
+        const linkInfoBtn = document.getElementById('linkInfoBtn');
+        const trackerForm = document.getElementById('trackerForm');
+        const aliasInput = document.getElementById('alias');
+        const descriptionInput = document.getElementById('description');
+        const statusInput = document.getElementById('status');
+        const timingEnabledInput = document.getElementById('timing_enabled');
+        const trackerTypeInput = document.getElementById('tracker_type');
+        const redirectUrlInput = document.getElementById('redirect_url');
+        const userIdInput = document.getElementById('user_id');
+        const trackerIdInput = document.getElementById('tracker_id');
+
+        backBtn.addEventListener('click', () => {
+            window.location.href = '/list_trackers';
+        });
+
+        linkInfoBtn.addEventListener('click', () => {
+            window.location.href = `/link_info/${trackerId}`;
+        });
+
+        trackerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const data = {
+                alias: aliasInput.value,
+                description: descriptionInput.value,
+                status: statusInput.value,
+                timing_enabled: timingEnabledInput.value === 'true',
+                tracker_type: trackerTypeInput.value
+            };
+
+            fetch(`/tracker_update/${trackerId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                message.textContent = data.message;
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                       });
+        });
+
+        fetch(`/tracker_info/${trackerId}`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            aliasInput.value = data.info.alias;
+            descriptionInput.value = data.info.description;
+            statusInput.value = data.info.status;
+            timingEnabledInput.value = data.info.timing_enabled.toString();
+            trackerTypeInput.value = data.info.tracker_type;
+            redirectUrlInput.value = data.info.redirect_url;
+            userIdInput.value = data.info.user_id;
+            trackerIdInput.value = data.info.tracker_id;
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    </script>
+</body>
+</html>

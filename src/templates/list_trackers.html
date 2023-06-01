@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>追踪器列表</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-200">
+    <div class="container mx-auto py-10">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-bold">追踪器列表</h1>
+            <button id="addTrackerBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mb-4">
+                新建
+            </button>
+        </div>
+
+        <div id="message" class="mb-4"></div>
+        <div id="trackerList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+    <script>
+        const addTrackerBtn = document.getElementById('addTrackerBtn');
+        const message = document.getElementById('message');
+        const trackerList = document.getElementById('trackerList');
+
+        function postData(url = '', data = {}) {
+            return fetch(url, {
+                method: 'POST',
+                mode: 'cors', // add this line
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(data),
+            })
+            .then(response => response.json());
+        }
+        
+
+        function getTrackers() {
+            postData('http://127.0.0.1:5000/list_trackers')
+            .then(data => {
+                if (data.status === 'success') {
+                    data.trackers.forEach(tracker => {
+                        const trackerDiv = document.createElement('div');
+                        trackerDiv.className = 'col-span-1 bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4';
+                        trackerDiv.innerHTML = `
+                            <h2 class="font-bold text-xl mb-2">${tracker.alias}</h2>
+                            <p class="text-gray-700 text-base">${tracker.description}</p>
+                            <div class="relative">
+                                <input id="copyInput" type="text" class="w-full border border-gray-300 rounded px-3 py-2" value="http://127.0.0.1:5000/pixels/${tracker.tracker_id}.png" readonly>
+                                <button id="copyButton" class="absolute top-0 right-0 bottom-0 px-2 py-1 bg-blue-500 text-white rounded-tr rounded-bl">复制</button>
+                            </div>                           
+                            <p class="text-gray-700 text-base">状态: ${tracker.status}</p>
+                            <p class="text-gray-700 text-base">计时功能: ${tracker.timing_enabled ? '开启' : '关闭'}</p>
+                            <p class="text-gray-700 text-base">追踪器类型: ${tracker.tracker_type}</p>
+                            <p class="text-gray-700 text-base">被访问次数: ${tracker.record_num}</p>
+                            <button onclick="window.location.href='/tracker_info/${tracker.tracker_id}'" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4 mr-4">
+                                编辑详情
+                            </button>
+                            <button onclick="window.location.href='/tracker_records/${tracker.tracker_id}'" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4 mr-4">
+                                查看记录
+                            </button>
+                            <button id="deleteBtn${tracker.tracker_id}" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4">
+                                删除
+                            </button>                            
+                        `;
+                        const copyButton = trackerDiv.querySelector('#copyButton');
+                        const copyInput = trackerDiv.querySelector('#copyInput');
+                        
+                        copyButton.addEventListener('click', () => {
+                            copyInput.select();
+                            copyInput.setSelectionRange(0, 99999); // 兼容移动设备
+                            document.execCommand('copy');
+                            // 可以添加一些反馈，比如显示一个复制成功的提示
+                            alert('已复制到剪贴板');
+                        });
+                        const deleteBtn = trackerDiv.querySelector(`#deleteBtn${tracker.tracker_id}`);
+                        deleteBtn.addEventListener('click', function() {
+                            postData(`http://127.0.0.1:5000/tracker_delete/${tracker.tracker_id}`)
+                            .then(data => {
+                                message.textContent = data.message;
+                                if (data.status === 'success') {
+                                    getTrackers();
+                                }
+                            })
+                            .catch((error) => {
+                                console.error('Error:', error);
+                            });
+                        });
+                        trackerList.appendChild(trackerDiv);
+                    });
+                } else {
+                    message.textContent = data.message;
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        addTrackerBtn.addEventListener('click', function() {
+            postData('http://127.0.0.1:5000/add_tracker')
+            .then(data => {
+                message.textContent = data.message;
+                if (data.status === 'success') {
+                    window.location.href = `/tracker_info/${data.id}`;
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
+
+        getTrackers();
+    </script>
+</body>
+</html>

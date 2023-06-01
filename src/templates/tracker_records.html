@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>访问记录</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-200">
+    <div class="container mx-auto py-10">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-bold">访问记录</h1>
+            <button onclick="window.location.href='/list_trackers'" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                返回
+            </button>
+        </div>
+        <div id="recordList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+    <script>
+        const recordList = document.getElementById('recordList');
+
+        function postData(url = '', data = {}) {
+            return fetch(url, {
+                method: 'POST',
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(data),
+            })
+            .then(response => response.json());
+        }
+
+        function getRecords() {
+            const trackerId = window.location.pathname.split('/').pop();
+            postData(`http://127.0.0.1:5000/tracker_records/${trackerId}`)
+            .then(data => {
+                if (data.status === 'success') {
+                    data.records.forEach(record => {
+                        const recordDiv = document.createElement('div');
+                        recordDiv.className = 'col-span-1 bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4';
+                        recordDiv.innerHTML = `
+                            <h2 class="font-bold text-xl mb-2">记录ID: ${record.record_id}</h2>
+                            <p class="text-gray-700 text-base">IP: ${record.access_ip}</p>
+                            <p class="text-gray-700 text-base">时间: ${record.access_time}</p>
+                            <p class="text-gray-700 text-base">城市: ${record.city}</p>
+                            <p class="text-gray-700 text-base">国家: ${record.country}</p>
+                            <p class="text-gray-700 text-base">阅读时间: ${record.read_time}</p>
+                            <p class="text-gray-700 text-base">跳转次数: ${record.redirect_count}</p>
+                            <button onclick="this.nextElementSibling.classList.toggle('hidden')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mt-4">
+                                显示Headers
+                            </button>
+                            <pre class="text-gray-700 text-base hidden overflow-x-auto whitespace-pre-wrap">${record.request_header}</pre>
+                        `;
+                        recordList.appendChild(recordDiv);
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        getRecords();
+    </script>
+</body>
+</html>
