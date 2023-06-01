@@ -1,9 +1,16 @@
-<img src="resources/icon.jpeg" alt="icon" style="zoom: 20%;" />
+<p align="center">
+  <img src="resources/icon.jpeg" alt="icon" width="100" height="100" align="center"/>
+</p>
 
 <h1 align="center">GhostKiller</h1>
 
-<center>邮件追踪器，支持查看用户在邮件页面停留的时间
-<center>NKU 数据库系统 2023 Spring 课程项目
+<div align="center">
+  
+  邮件追踪器，支持查看用户在邮件页面停留的时间
+
+  NKU 数据库系统 2023 Spring 课程项目
+  
+</div>
 
 ## 原理
 
