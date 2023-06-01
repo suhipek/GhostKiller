@@ -1,6 +1,9 @@
-# GhostKiller
+<img src="resources/icon.jpeg" alt="icon" style="zoom: 20%;" />
 
-邮件追踪器，支持查看用户在邮件页面停留的时间
+<h1 align="center">GhostKiller</h1>
+
+<center>邮件追踪器，支持查看用户在邮件页面停留的时间
+<center>NKU 数据库系统 2023 Spring 课程项目
 
 ## 原理
 
