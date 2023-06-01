@@ -2,7 +2,7 @@ from flask import Flask, redirect, request, abort, send_file, make_response
 from datetime import datetime
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.exc import IntegrityError, NoResultFound
-from db_tables import User, Tracker, RedirectLink, TrackerRecord, TimingRecord
+from db_tables import User, Tracker, RedirectLink, TrackerRecord, TimingRecord, UserActivity
 import geoip2.database
 import time
 import uuid
@@ -48,6 +48,7 @@ def pixel_tracker(tracker_id):
         db_session.commit()
 
         if tracker.timing_enabled:
+            print(f'timing enabled new record id {record.record_id}')
             timing_record = TimingRecord(
                 record_id=record.record_id,
                 last_access_time=datetime.now(),
@@ -179,7 +180,7 @@ def register():
     finally:
         if db_session:
             db_session.close()
-    
+
 @app.get('/list_trackers')
 def list_trackers_page():
     return send_file("templates/list_trackers.html")
@@ -230,6 +231,37 @@ def add_tracker():
     
     except Exception as e:
         traceback.print_exc()
+        return failed("失败")
+    finally:
+        if db_session:
+            db_session.close()
+
+@app.post('/tracker_delete/<int:tracker_id>')
+def delete_tracker(tracker_id):
+    try:
+        db_session = session_factory()
+        db_session.begin()
+
+        tracker = db_session.query(Tracker).filter_by(tracker_id=tracker_id).one()
+
+        db_session.query(RedirectLink).filter_by(tracker_id=tracker.tracker_id).delete()
+
+        record_ids = [record_id for record_id, \
+            in db_session.query(TrackerRecord.record_id).\
+                filter_by(tracker_id=tracker.tracker_id).all()]
+        db_session.query(TimingRecord).\
+            filter(TimingRecord.record_id.in_(record_ids)).\
+            delete(synchronize_session=False)
+        db_session.query(TrackerRecord).\
+            filter_by(tracker_id=tracker.tracker_id).delete()
+
+        db_session.delete(tracker)
+        db_session.commit()
+        return success("删除成功")
+    except Exception as e:
+        traceback.print_exc()
+        if db_session:
+            db_session.rollback()
         return failed("失败")
     finally:
         if db_session:
@@ -339,6 +371,33 @@ def tracker_records(tracker_id):
     finally:
         if db_session:
             db_session.close()
+
+@app.post('/why_i_have_to_write_this')
+def update_tracker_name_description():
+    db_session = session_factory()
+
+    # 调用存储过程
+    session_id = request.cookies.get('session_id')
+    tracker_id = request.form.get('tracker_id')
+    new_alias = 'ohMyTracker'
+    new_description = 'ohMyDescription'
+    db_session.execute("SELECT update_tracker(:session_id, :tracker_id, :new_alias, :new_description)",
+                    {'session_id': session_id, 'tracker_id': tracker_id, 'new_alias': new_alias, 'new_description': new_description})
+
+    # 提交事务
+    db_session.commit()
+    db_session.close()
+    return success("更新成功")
+
+@app.get('/some_very_secret_page')
+def statistics():
+    db_session = session_factory()
+    line_text = "|{:<10}|{:<10}|{:>10}|{:>10}|\n"
+    res = line_text.format('username', 'user_id', 'trackers', 'records')
+    res += line_text.format('-'*10, '-'*10, '-'*10, '-'*10)
+    for activity in db_session.query(UserActivity).all():
+        res += line_text.format(activity.username, activity.user_id, activity.tracker_count, activity.record_count)
+    return res
 
 # 启动应用程序
 if __name__ == '__main__':

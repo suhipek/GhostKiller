@@ -49,3 +49,11 @@ class TimingRecord(Base):
     record_id = Column(Integer, ForeignKey('tracker_records.record_id'))
     last_access_time = Column(TIMESTAMP, nullable=False)
     redirect_count = Column(Integer, nullable=False)
+
+class UserActivity(Base):
+    __tablename__ = 'user_activity'
+
+    user_id = Column(Integer, primary_key=True)
+    username = Column(String(255))
+    tracker_count = Column(Integer)
+    record_count = Column(Integer)
