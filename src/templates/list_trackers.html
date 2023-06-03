@@ -37,9 +37,10 @@
         
 
         function getTrackers() {
-            postData('http://127.0.0.1:5000/list_trackers')
+            postData('/list_trackers')
             .then(data => {
                 if (data.status === 'success') {
+                    trackerList.innerHTML = '';
                     data.trackers.forEach(tracker => {
                         const trackerDiv = document.createElement('div');
                         trackerDiv.className = 'col-span-1 bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4';
@@ -47,7 +48,7 @@
                             <h2 class="font-bold text-xl mb-2">${tracker.alias}</h2>
                             <p class="text-gray-700 text-base">${tracker.description}</p>
                             <div class="relative">
-                                <input id="copyInput" type="text" class="w-full border border-gray-300 rounded px-3 py-2" value="http://127.0.0.1:5000/pixels/${tracker.tracker_id}.png" readonly>
+                                <input id="copyInput" type="text" class="w-full border border-gray-300 rounded px-3 py-2" value="/pixels/${tracker.tracker_id}.png" readonly>
                                 <button id="copyButton" class="absolute top-0 right-0 bottom-0 px-2 py-1 bg-blue-500 text-white rounded-tr rounded-bl">复制</button>
                             </div>                           
                             <p class="text-gray-700 text-base">状态: ${tracker.status}</p>
@@ -72,11 +73,11 @@
                             copyInput.setSelectionRange(0, 99999); // 兼容移动设备
                             document.execCommand('copy');
                             // 可以添加一些反馈，比如显示一个复制成功的提示
-                            alert('已复制到剪贴板');
+                            message.textContent = "复制成功";
                         });
                         const deleteBtn = trackerDiv.querySelector(`#deleteBtn${tracker.tracker_id}`);
                         deleteBtn.addEventListener('click', function() {
-                            postData(`http://127.0.0.1:5000/tracker_delete/${tracker.tracker_id}`)
+                            postData(`/tracker_delete/${tracker.tracker_id}`)
                             .then(data => {
                                 message.textContent = data.message;
                                 if (data.status === 'success') {
@@ -99,12 +100,15 @@
         }
 
         addTrackerBtn.addEventListener('click', function() {
-            postData('http://127.0.0.1:5000/add_tracker')
+            postData('/add_tracker')
             .then(data => {
                 message.textContent = data.message;
-                if (data.status === 'success') {
-                    window.location.href = `/tracker_info/${data.id}`;
-                }
+                postData(`/initial/${data.id}`).then(idata => {
+                    console.log(idata);
+                    if (data.status === 'success') {
+                        window.location.href = `/tracker_info/${data.id}`;
+                    }
+                });
             })
             .catch((error) => {
                 console.error('Error:', error);

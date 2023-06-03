@@ -372,22 +372,29 @@ def tracker_records(tracker_id):
         if db_session:
             db_session.close()
 
-@app.post('/why_i_have_to_write_this')
-def update_tracker_name_description():
-    db_session = session_factory()
+@app.post('/initial/<int:tracker_id>')
+def initial_name_description(tracker_id):
+    try:
+        db_session = session_factory()
 
-    # 调用存储过程
-    session_id = request.cookies.get('session_id')
-    tracker_id = request.form.get('tracker_id')
-    new_alias = 'ohMyTracker'
-    new_description = 'ohMyDescription'
-    db_session.execute("SELECT update_tracker(:session_id, :tracker_id, :new_alias, :new_description)",
-                    {'session_id': session_id, 'tracker_id': tracker_id, 'new_alias': new_alias, 'new_description': new_description})
+        # 调用存储过程
+        session_id = request.cookies.get('session_id')
+        # tracker_id = request.form.get('tracker_id')
+        new_alias = 'ohMyTracker'
+        new_description = 'ohMyDescription'
+        db_session.execute("SELECT update_tracker(:session_id, :tracker_id, :new_alias, :new_description)",
+                        {'session_id': session_id, 'tracker_id': tracker_id, 'new_alias': new_alias, 'new_description': new_description})
 
-    # 提交事务
-    db_session.commit()
-    db_session.close()
-    return success("更新成功")
+        # 提交事务
+        db_session.commit()
+        db_session.close()
+        return success("更新成功")
+    except Exception as e:
+        traceback.print_exc()
+        return failed(traceback.format_exc())
+    finally:
+        if db_session:
+            db_session.close()
 
 @app.get('/some_very_secret_page')
 def statistics():

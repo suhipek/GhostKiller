@@ -33,7 +33,7 @@
 
         function getRecords() {
             const trackerId = window.location.pathname.split('/').pop();
-            postData(`http://127.0.0.1:5000/tracker_records/${trackerId}`)
+            postData(`/tracker_records/${trackerId}`)
             .then(data => {
                 if (data.status === 'success') {
                     data.records.forEach(record => {

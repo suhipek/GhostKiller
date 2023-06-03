@@ -51,7 +51,7 @@
         }
         
         loginBtn.addEventListener('click', function() {
-            postData('http://127.0.0.1:5000/login', {
+            postData('/login', {
                 username: form.username.value,
                 password: form.password.value
             })
@@ -67,7 +67,7 @@
         });
         
         registerBtn.addEventListener('click', function() {
-            postData('http://127.0.0.1:5000/register', {
+            postData('/register', {
                 username: form.username.value,
                 password: form.password.value
             })
