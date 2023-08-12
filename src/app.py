@@ -197,8 +197,8 @@ def list_trackers():
         
         trackers = list(map(lambda x: x.__dict__, trackers))
         list(map(lambda x: x.pop('_sa_instance_state'), trackers))
-        for t in trackers:
-            t['record_num'] = 0 
+        # for t in trackers:
+        #     t['record_num'] = 0 
         return {'status': 'success', 'message': "获取成功", 'trackers': trackers}
     
     except Exception as e:

@@ -48,7 +48,7 @@
                             <h2 class="font-bold text-xl mb-2">${tracker.alias}</h2>
                             <p class="text-gray-700 text-base">${tracker.description}</p>
                             <div class="relative">
-                                <input id="copyInput" type="text" class="w-full border border-gray-300 rounded px-3 py-2" value="/pixels/${tracker.tracker_id}.png" readonly>
+                                <input id="copyInput" type="text" class="w-full border border-gray-300 rounded px-3 py-2" value="${window.location.hostname}:${window.location.port}/pixels/${tracker.tracker_id}.png" readonly>
                                 <button id="copyButton" class="absolute top-0 right-0 bottom-0 px-2 py-1 bg-blue-500 text-white rounded-tr rounded-bl">复制</button>
                             </div>                           
                             <p class="text-gray-700 text-base">状态: ${tracker.status}</p>

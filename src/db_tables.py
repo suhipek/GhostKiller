@@ -22,6 +22,7 @@ class Tracker(Base):
     tracker_type = Column(String(255), nullable=False)
     timing_enabled = Column(Boolean, nullable=False)
     status = Column(String(255), nullable=False)
+    record_num = Column(Integer, default=0)
 
 class RedirectLink(Base):
     __tablename__ = 'redirect_links'
