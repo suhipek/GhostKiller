@@ -6,14 +6,14 @@
 
 <div align="center">
   
-  邮件追踪器，支持查看用户在邮件页面停留的时间
-
-  NKU 数据库系统 2023 Spring 课程项目
+  Track how much time your recipant spend on reading your mail
+  
+  NKU Database System 2023 Spring Course Project
   
 </div>
 
-## 原理
+## Principle
 
-在邮件中嵌入一个对肉眼不可见的 1*1 大小图片，图片URL指向受控服务器。
+An invisible 1*1 size image is embedded in the email, and the image URL points to a controlled server.
 
-对于需要查看用户留存时间的追踪器，对图片URL的请求会**在一定时间后**返回一个302跳转，跳转目标依然在受控服务器。多次跳转后，我们可以通过比较第一次访问时间和最后一次访问时间的到存留时间。
+For trackers that need to view user retention time, the request for the image URL will return a 302 redirect after a certain time, with the redirection target still on the controlled server. After multiple redirects, we can determine the retention time by comparing the time of the first visit and the last visit.
