@@ -12,7 +12,7 @@
   
 </div>
 
-## Principle
+## How it works
 
 An invisible 1*1 size image is embedded in the email, and the image URL points to a controlled server.
 
